@@ -1,5 +1,5 @@
 # Text-Adventure
-Status: Alpha
+Status: Beta
 
 ### Description:
 This project is an experiment in creating a procedural generating text adventure game, with world boundaries. The goal is to build an adventure world rendered entirely with ASCII art. The player can roam freely, and new segments of the map are generated on the fly as they venture into unknown territory. The objective is to collect coins, on the way to finding the shop, then when at shop can buy, cola and doughnuts, and later when you find shop 2 then rocky-road, such food sustains and restores health on the player, but there are guardians of the pounds whom become more enraged for each pound the player takes from them and speeds up, and they multiply each time the player visits the shop. The pounds eventually run out, when the user has collected all of the coins, then they win the game.
