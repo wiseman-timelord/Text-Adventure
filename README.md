@@ -2,7 +2,7 @@
 Status: Alpha
 
 ### Description:
-This project is an experiment in creating a procedurally generating text adventure game. The goal is to build an infinitely explorable world rendered entirely with ASCII art. The player can roam freely, and new segments of the map are generated on the fly as they venture into unknown territory. The current version establishes the core engine and basic gameplay mechanics.
+This project is an experiment in creating a procedural generating text adventure game, with world boundaries. The goal is to build an adventure world rendered entirely with ASCII art. The player can roam freely, and new segments of the map are generated on the fly as they venture into unknown territory. The objective is to collect coins, on the way to finding the shop, then when at shop can buy cola and doughnuts, such food sustains and restores health on the player, but there are guardians of the pounds whom become more enraged for each pound the player takes from them and speeds up, and they multiply each time the player visits the shop. The pounds eventually run out, when the user has collected all of the coins, then they win the game.
 
 ### Features:
 - **Procedurally Generated World:** The game world is composed of individual map "chunks" that are generated as the player enters them, creating a unique and near-infinite landscape to explore, currently populated with simple rocks and bushes.
