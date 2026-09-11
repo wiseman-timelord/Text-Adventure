@@ -1,5 +1,5 @@
 from map import CHUNK_WIDTH, CHUNK_HEIGHT, WORLD_CHUNKS_X, WORLD_CHUNKS_Y, CENTER_CHUNK_X, CENTER_CHUNK_Y
-from ascii import PLAYER, WALL, COIN, SHOP, ROCK, GUARD, BOG, COIN_LEFT, COIN_RIGHT
+from ascii import PLAYER, WALL, COIN, SHOP, ROCK, GUARD, ZOMBIE, BOG, COIN_LEFT, COIN_RIGHT
 import time
 
 
@@ -12,7 +12,6 @@ class Player:
         self.chunk_y = start_chunk_y
         self.symbol = PLAYER
 
-        # Inventory
         self.coins = 0
         self.doughnuts = 0
         self.cola = 0
@@ -20,7 +19,6 @@ class Player:
         self.health = 100.0
         self.max_health = 100.0
 
-        # Lifetime stats
         self.doughnuts_eaten = 0
         self.cola_drunk = 0
         self.rocky_road_eaten = 0
@@ -30,10 +28,9 @@ class Player:
 
         self.inside_shop = False
 
-        # Bog: require two presses in the same direction to move once
         self._bog_pending_dx = 0
         self._bog_pending_dy = 0
-        self._bog_charge = 0   # 0 = need first press, 1 = need second
+        self._bog_charge = 0
 
     def move(self, dx, dy, world_map):
         new_x = self.x + dx
@@ -75,18 +72,19 @@ class Player:
             self._bog_charge = 0
             return "guard"
 
-        # ---- Bog: need two consecutive presses in the same direction ----
+        if tile == ZOMBIE:
+            self.health = max(0.0, self.health - 10.0)
+            self._bog_charge = 0
+            return "zombie"
+
         if tile == BOG:
             if self._bog_charge == 1 and self._bog_pending_dx == dx and self._bog_pending_dy == dy:
-                # Second matching press – allow the move
                 self._bog_charge = 0
             else:
-                # First press (or direction changed) – charge and stay put
                 self._bog_pending_dx = dx
                 self._bog_pending_dy = dy
                 self._bog_charge = 1
                 return "bog"
-
         else:
             self._bog_charge = 0
 
@@ -116,14 +114,9 @@ class Player:
         return True
 
     def try_buy(self, item, special_shop=False):
-        prices = {
-            "doughnut": 1,
-            "cola": 2,
-            "rocky_road": 1,
-        }
+        prices = {"doughnut": 1, "cola": 2, "rocky_road": 1}
         if item not in prices:
             return False, "Unknown item."
-        # Rocky-Road only available at the special shop
         if item == "rocky_road" and not special_shop:
             return False, "Rocky-Road is only sold at the other shop."
         if item == "doughnut" and special_shop:
@@ -145,7 +138,6 @@ class Player:
         return False, "Error."
 
     def use_item(self, item):
-        # Doughnut restores 12
         if item == "doughnut":
             if self.doughnuts <= 0:
                 return False, "No Doughnuts left."
@@ -154,7 +146,6 @@ class Player:
             restore = 12.0
             self.health = min(self.max_health, self.health + restore)
             return True, f"Ate a Doughnut! (+{restore:.0f} health)"
-        # Cola restores 12 * 1.75 = 21
         if item == "cola":
             if self.cola <= 0:
                 return False, "No Cola left."
@@ -163,7 +154,6 @@ class Player:
             restore = 12.0 * 1.75
             self.health = min(self.max_health, self.health + restore)
             return True, f"Drank a Cola! (+{restore:.0f} health)"
-        # Rocky-Road restores 12 * 1.5 = 18
         if item == "rocky_road":
             if self.rocky_road <= 0:
                 return False, "No Rocky-Road left."

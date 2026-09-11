@@ -21,7 +21,7 @@ from map import (
 from player import Player
 from ascii import (
     SHOP_DIALOG, SHOP_DIALOG_SPECIAL,
-    WATER, BOG, ROCK, BUSH, WALL, EMPTY, COIN, SHOP, GUARD,
+    WATER, BOG, ROCK, BUSH, WALL, EMPTY, COIN, SHOP, GUARD, ZOMBIE,
     COIN_LEFT, COIN_RIGHT,
 )
 
@@ -48,6 +48,7 @@ TILE_COLORS = {
     COIN_RIGHT: "#e3b341",
     SHOP:       "#010409",
     GUARD:      "#f85149",
+    ZOMBIE:     "#f85149",
     "@":        "#ffffff",
     "/":        "#3fb950",
     "\\":       "#3fb950",
@@ -93,12 +94,12 @@ class StartDialog(QDialog):
         layout.addWidget(title)
 
         help_text = QLabel(
-            "Collect coins (£), avoid the Guardians (G).\n"
-            "Find shops ($) to buy food and drink.\n"
-            "One shop is already marked on the minimap –\n"
-            "find the other for Rocky-Road (better value).\n"
-            "Brown bogs (%) require two presses to cross.\n\n"
-            "Collect EVERY coin in the world to win!\n\n"
+            "Collect coins (£).\n"
+            "G = Gold-Hunter (guards coins, chases if you take one).\n"
+            "Z = Zombie (slow at first, speeds up with coins; +1 per tile each shop visit).\n"
+            "One shop is marked on the minimap – find the other for Rocky-Road.\n"
+            "Brown bogs (%) need two presses to cross.\n\n"
+            "Collect EVERY coin to win!\n\n"
             "Arrow keys move · R restarts · Q quits"
         )
         help_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -655,12 +656,9 @@ class GameWindow(QMainWindow):
     def _draw_character(self):
         remaining = sum(self.world_map.coins_remaining.values())
         text = (
-            f"Pos   : ({self.player.x}, {self.player.y})\n"
-            f"Chunk : ({self.player.chunk_x}, {self.player.chunk_y})\n"
-            f"\n"
-            f"  £ Coins : {self.player.coins}\n"
-            f"  Collected : {self.player.coins_collected}\n"
-            f"  Remaining : {remaining}\n"
+            f"  £ Coins    : {self.player.coins}\n"
+            f"  Collected  : {self.player.coins_collected}\n"
+            f"  Remaining  : {remaining}\n"
         )
         self.char_view.setPlainText(text)
 
@@ -719,8 +717,9 @@ class GameWindow(QMainWindow):
         if dead:
             self._show_death_dialog()
             return
-        speed = 1.0 + self.player.coins * 0.08
-        self.world_map.move_guards(self.player, speed_factor=speed)
+        self.world_map.move_monsters(
+            self.player, coins_collected=self.player.coins_collected
+        )
         self._refresh_all()
 
     def keyPressEvent(self, event: QKeyEvent):
@@ -763,23 +762,22 @@ class GameWindow(QMainWindow):
                 self.player.shops_visited += 1
                 spawned = self.world_map.notify_shop_visit(self.player)
                 if spawned:
-                    self.status_message = "Shop visited – a new guardian stirs somewhere nearby…"
+                    self.status_message = f"Shop visited – zombies multiply! (now {self.world_map.zombie_level} per tile)"
                 else:
                     self.status_message = "Shop visited."
                 self._open_shop()
             else:
                 self.status_message = "You are in the shop."
         elif result == "guard":
-            self.status_message = "Ouch! A guardian hit you. (-8 health)"
+            self.status_message = "A Gold-Hunter strikes! (-8 health)"
         elif result == "bog":
             self.status_message = "Squelch… the bog is sticky. Press again the same way to push through."
+        elif result == "zombie":
+            self.status_message = "A zombie claws at you! (-10 health)"
         elif result is False:
             self.status_message = "Blocked (wall or edge of the world)."
         else:
-            self.status_message = (
-                f"Pos ({self.player.x},{self.player.y})  "
-                f"Chunk ({self.player.chunk_x},{self.player.chunk_y})"
-            )
+            self.status_message = "Exploring the world..."
         self._refresh_all()
 
     def _open_shop(self):

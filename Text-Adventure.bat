@@ -42,11 +42,17 @@ pause
 goto menu
 
 :run_game
+cls
+echo ================================================================================
+echo     Text-Adventure - Launching Game
+echo ================================================================================
+echo.
 echo Starting Text Adventure...
 python launcher.py
 echo.
-echo Game has exited. Press any key to return to the menu.
-pause > nul
+echo --------------------------------------------------------------------------------
+echo Game has exited. Returning to menu...
+timeout /t 2 >nul
 goto menu
 
 :install_menu

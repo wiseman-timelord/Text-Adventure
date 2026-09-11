@@ -9,7 +9,8 @@ WATER  = "~"
 BOG    = "%"          # sticky brown ground – costs 2 presses to cross
 COIN   = "£"
 SHOP   = "$"
-GUARD  = "G"          # coin guardian
+GUARD  = "G"          # Gold-Hunter – guards coins, flees zombies
+ZOMBIE = "Z"          # Zombie – slow, chases player and gold-hunters
 
 # Coin is rendered as the three-character sequence  ( £ )
 COIN_LEFT  = "("
@@ -64,7 +65,6 @@ PEOPLE = {
     "villager": "i",
 }
 
-# Standard shop dialog
 SHOP_DIALOG = """\
  -= The Shop =-
 
@@ -74,7 +74,6 @@ Doughnuts  - £1 [Buy]
    [Exit Shop]
 """
 
-# Special shop (the "other" one) sells Rocky-Road
 SHOP_DIALOG_SPECIAL = """\
  -= The Rocky Shop =-
 
@@ -98,5 +97,6 @@ WIN_BANNER = [
 
 if __name__ == "__main__":
     print("--- Tiles ---")
-    for name in ["PLAYER", "ROCK", "BUSH", "WALL", "WATER", "BOG", "COIN", "SHOP", "GUARD"]:
+    for name in ["PLAYER", "ROCK", "BUSH", "WALL", "WATER", "BOG",
+                 "COIN", "SHOP", "GUARD", "ZOMBIE"]:
         print(f"  {name:8} : {globals()[name]}")
