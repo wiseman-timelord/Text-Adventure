@@ -1,5 +1,6 @@
 import blessed
 
+
 class Renderer:
     """
     Handles all rendering tasks for the game, drawing the map, player,
@@ -26,8 +27,7 @@ class Renderer:
             player (Player): The player object.
             world_map (Map): The world map object.
         """
-        # It's often faster to build a single large string and print it once
-        # rather than making many small print calls.
+        # Build a single large string and print it once for better performance.
         output = self.term.home + self.term.clear
 
         # Get the current map chunk that the player is in.
@@ -40,18 +40,21 @@ class Renderer:
         # Draw the player on top of the map.
         output += self.term.move_xy(player.x, player.y) + self.term.bold(player.symbol)
 
-        # Draw a simple UI with debug information.
-        # We'll draw it at the bottom of the screen.
+        # Draw a simple UI with debug information at the bottom of the screen.
         height, width = self.term.height, self.term.width
-        ui_text = f"Coords: ({player.x}, {player.y}) | Chunk: ({player.chunk_x}, {player.chunk_y}) | Press 'q' to quit"
+        ui_text = (
+            f"Coords: ({player.x}, {player.y}) | "
+            f"Chunk: ({player.chunk_x}, {player.chunk_y}) | "
+            f"Press 'k' for keys / 'q' to quit"
+        )
         # Ensure text doesn't wrap
         if len(ui_text) >= width:
-            ui_text = ui_text[:width -1]
+            ui_text = ui_text[: width - 1]
 
         output += self.term.move_xy(0, height - 1) + self.term.on_black(ui_text)
 
         # Print the composed frame to the screen.
-        print(output, end='', flush=True)
+        print(output, end="", flush=True)
 
     def draw_map_screen(self, player, world_map):
         """
@@ -65,7 +68,7 @@ class Renderer:
             x = (self.term.width - len(text)) // 2
             y = self.term.height // 2
             output += self.term.move_xy(x, y) + text
-            print(output, end='', flush=True)
+            print(output, end="", flush=True)
             return
 
         # Determine the boundaries of the map to draw
@@ -87,11 +90,11 @@ class Renderer:
                     screen_x = offset_x + r_x * 4
                     screen_y = offset_y + r_y * 2
 
-                    symbol = '[ ]'
-                    if (chunk_x, chunk_y) == (0, 0): # Start chunk
-                        symbol = '[S]'
-                    if (chunk_x, chunk_y) == (player.chunk_x, player.chunk_y): # Current chunk
-                        symbol = self.term.bold('[X]')
+                    symbol = "[ ]"
+                    if (chunk_x, chunk_y) == (0, 0):  # Start chunk
+                        symbol = "[S]"
+                    if (chunk_x, chunk_y) == (player.chunk_x, player.chunk_y):  # Current chunk
+                        symbol = self.term.bold("[X]")
 
                     output += self.term.move_xy(screen_x, screen_y) + symbol
 
@@ -99,17 +102,16 @@ class Renderer:
                     if (chunk_x + 1, chunk_y) in visited_chunks:
                         output += self.term.move_xy(screen_x + 3, screen_y) + "-"
                     if (chunk_x, chunk_y + 1) in visited_chunks:
-                        output += self.term.move_xy(screen_x + 1, screen_y + 1) + '|'
+                        output += self.term.move_xy(screen_x + 1, screen_y + 1) + "|"
 
         # Draw UI
         height, width = self.term.height, self.term.width
         ui_text = "MAP VIEW | 'S' = Start, 'X' = Current | Press 'm' to return to game."
         if len(ui_text) >= width:
-            ui_text = ui_text[:width -1]
+            ui_text = ui_text[: width - 1]
         output += self.term.move_xy(0, height - 1) + self.term.on_black(ui_text)
 
-        print(output, end='', flush=True)
-
+        print(output, end="", flush=True)
 
     def draw_keys_screen(self):
         """
@@ -125,7 +127,7 @@ class Renderer:
             " r : Restart the Game",
             " q : Quit the Game",
             "",
-            " Arrow Keys : Move Player"
+            " Arrow Keys : Move Player",
         ]
 
         # Center the content block on the screen
@@ -144,13 +146,12 @@ class Renderer:
         height, width = self.term.height, self.term.width
         ui_text = "Press 'k' to return to the game."
         if len(ui_text) >= width:
-            ui_text = ui_text[:width - 1]
+            ui_text = ui_text[: width - 1]
         output += self.term.move_xy(0, height - 1) + self.term.on_black(ui_text)
 
-        print(output, end='', flush=True)
+        print(output, end="", flush=True)
 
 
 # This file is a module and is not intended to be run directly.
-# Its functionality will be tested by integrating it into the main game loop.
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("This is the renderer module. It should be imported, not run directly.")

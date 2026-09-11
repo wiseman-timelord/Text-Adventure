@@ -1,103 +1,134 @@
-# We need to import the map constants to understand chunk dimensions and wall tiles.
-from map import CHUNK_WIDTH, CHUNK_HEIGHT
-from ascii_art import PLAYER, WALL
+from map import CHUNK_WIDTH, CHUNK_HEIGHT, WORLD_CHUNKS_X, WORLD_CHUNKS_Y, CENTER_CHUNK_X, CENTER_CHUNK_Y
+from ascii import PLAYER, WALL, COIN, SHOP, ROCK, GUARD
+import time
+
 
 class Player:
-    """
-    Manages the player's state, including position and movement.
-    """
-
-    def __init__(self, start_x, start_y, start_chunk_x=0, start_chunk_y=0):
-        """
-        Initializes the player at a specific position.
-
-        Args:
-            start_x (int): The starting x-coordinate within the chunk.
-            start_y (int): The starting y-coordinate within the chunk.
-            start_chunk_x (int): The starting chunk's x-coordinate.
-            start_chunk_y (int): The starting chunk's y-coordinate.
-        """
-        self.x = start_x
-        self.y = start_y
+    def __init__(self, start_x=None, start_y=None,
+                 start_chunk_x=CENTER_CHUNK_X, start_chunk_y=CENTER_CHUNK_Y):
+        self.x = start_x if start_x is not None else CHUNK_WIDTH // 2
+        self.y = start_y if start_y is not None else CHUNK_HEIGHT // 2
         self.chunk_x = start_chunk_x
         self.chunk_y = start_chunk_y
         self.symbol = PLAYER
 
-    def move(self, dx, dy, world_map):
-        """
-        Handles player movement and chunk transitions.
+        # Inventory
+        self.coins = 0
+        self.doughnuts = 0
+        self.cola = 0
+        self.health = 100.0
+        self.max_health = 100.0
 
-        Args:
-            dx (int): The change in the x-direction (-1, 0, or 1).
-            dy (int): The change in the y-direction (-1, 0, or 1).
-            world_map (Map): The world map object, used for collision detection.
-        """
-        # Calculate the potential new coordinates.
+        # Lifetime stats
+        self.doughnuts_eaten = 0
+        self.cola_drunk = 0
+        self.shops_visited = 0
+        self.coins_collected = 0
+        self.start_time = time.time()
+
+        self.inside_shop = False
+
+    def move(self, dx, dy, world_map):
         new_x = self.x + dx
         new_y = self.y + dy
+        new_chunk_x = self.chunk_x
+        new_chunk_y = self.chunk_y
 
-        # Check for chunk transitions first.
-        # This ensures the player wraps to a new chunk before checking for
-        # collisions in the current one.
         if new_x < 0:
-            self.chunk_x -= 1
-            self.x = CHUNK_WIDTH - 2  # Appear on the right side of the new chunk
-            return
+            if self.chunk_x <= 0:
+                return False
+            new_chunk_x -= 1
+            new_x = CHUNK_WIDTH - 1
         elif new_x >= CHUNK_WIDTH:
-            self.chunk_x += 1
-            self.x = 1  # Appear on the left side of the new chunk
-            return
+            if self.chunk_x >= WORLD_CHUNKS_X - 1:
+                return False
+            new_chunk_x += 1
+            new_x = 0
 
         if new_y < 0:
-            self.chunk_y -= 1
-            self.y = CHUNK_HEIGHT - 2  # Appear on the bottom side
-            return
+            if self.chunk_y <= 0:
+                return False
+            new_chunk_y -= 1
+            new_y = CHUNK_HEIGHT - 1
         elif new_y >= CHUNK_HEIGHT:
-            self.chunk_y += 1
-            self.y = 1  # Appear on the top side
-            return
+            if self.chunk_y >= WORLD_CHUNKS_Y - 1:
+                return False
+            new_chunk_y += 1
+            new_y = 0
 
-        # If not transitioning, check for collisions within the current chunk.
-        # Get the current chunk data from the world map.
-        current_chunk_data = world_map.get_chunk(self.chunk_x, self.chunk_y)
+        chunk = world_map.get_chunk(new_chunk_x, new_chunk_y)
+        tile = chunk[new_y][new_x]
 
-        # Check if the destination tile is a wall.
-        if current_chunk_data[new_y][new_x] != WALL:
-            # If it's not a wall, update the player's position.
-            self.x = new_x
-            self.y = new_y
+        if tile == WALL or tile == ROCK:
+            return False
 
-# This block allows for testing the player movement logic independently.
-if __name__ == '__main__':
-    from map import Map
+        if tile == GUARD:
+            self.health = max(0.0, self.health - 8.0)
+            return "guard"
 
-    print("--- Testing Player Movement ---")
+        if self.inside_shop and tile != SHOP:
+            self.inside_shop = False
 
-    # Setup a mock world and a player.
-    test_map = Map()
-    player = Player(start_x=5, start_y=5)
+        self.x = new_x
+        self.y = new_y
+        self.chunk_x = new_chunk_x
+        self.chunk_y = new_chunk_y
 
-    print(f"Initial Position: Chunk({player.chunk_x}, {player.chunk_y}), Coords({player.x}, {player.y})")
+        if tile == COIN:
+            self.coins += 1
+            self.coins_collected += 1
+            world_map.remove_tile(self.chunk_x, self.chunk_y, new_x, new_y)
+            world_map.mark_poi_discovered(
+                self.chunk_x, self.chunk_y, "coin", new_x, new_y
+            )
+            return "coin"
 
-    # --- Test 1: Simple movement ---
-    player.move(1, 0, test_map)
-    print(f"Moved right. New Position: Coords({player.x}, {player.y})")
-    assert player.x == 6 and player.y == 5
+        if tile == SHOP:
+            world_map.mark_poi_discovered(
+                self.chunk_x, self.chunk_y, "shop", new_x, new_y
+            )
+            return "shop"
 
-    # --- Test 2: Collision with a wall ---
-    # The player is at (6, 5). We will place a wall at (7, 5) to block the next move.
-    test_map.get_chunk(0, 0)[5][7] = WALL
-    print("Placed a wall at (7, 5).")
+        return True
 
-    player.move(1, 0, test_map) # Try to move right from (6, 5) into the wall at (7, 5)
-    print(f"Tried to move right into wall. New Position: Coords({player.x}, {player.y})")
-    assert player.x == 6 and player.y == 5 # Position should not change
+    def try_buy(self, item):
+        prices = {"doughnut": 1, "cola": 2}
+        if item not in prices:
+            return False, "Unknown item."
+        cost = prices[item]
+        if self.coins < cost:
+            return False, f"Not enough coins! Need £{cost}."
+        self.coins -= cost
+        if item == "doughnut":
+            self.doughnuts += 1
+            return True, "Bought a Doughnut for £1! (use it from Inventory)"
+        if item == "cola":
+            self.cola += 1
+            return True, "Bought a Cola for £2! (use it from Inventory)"
+        return False, "Error."
 
-    # --- Test 3: Transition to a new chunk ---
-    player.x = CHUNK_WIDTH - 1 # Place player at the right edge
-    print(f"Moved player to edge: ({player.x}, {player.y})")
-    player.move(1, 0, test_map) # Move right to trigger transition
-    print(f"Moved right across border. New Position: Chunk({player.chunk_x}, {player.chunk_y}), Coords({player.x}, {player.y})")
-    assert player.chunk_x == 1 and player.x == 1
+    def use_item(self, item):
+        if item == "doughnut":
+            if self.doughnuts <= 0:
+                return False, "No Doughnuts left."
+            self.doughnuts -= 1
+            self.doughnuts_eaten += 1
+            restore = 12.0
+            self.health = min(self.max_health, self.health + restore)
+            return True, f"Ate a Doughnut! (+{restore:.0f} health)"
+        if item == "cola":
+            if self.cola <= 0:
+                return False, "No Cola left."
+            self.cola -= 1
+            self.cola_drunk += 1
+            restore = 12.0 * 1.75
+            self.health = min(self.max_health, self.health + restore)
+            return True, f"Drank a Cola! (+{restore:.0f} health)"
+        return False, "Unknown item."
 
-    print("\nPlayer movement tests passed!")
+    def decay_health(self, amount=0.12):
+        self.health = max(0.0, self.health - amount)
+        return self.health <= 0.0
+
+    def time_survived(self):
+        return time.time() - self.start_time
