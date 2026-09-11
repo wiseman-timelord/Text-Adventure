@@ -9,6 +9,7 @@ This project is an experiment in creating a procedural generating text adventure
 - **Player Exploration:** Navigate the world using the arrow keys. The game remembers previously visited areas.
 - **Dynamic Map Screen:** Toggle a high-level map view with the 'm' key to see which parts of the world you have discovered.
 - **Planned Terrain:** There are terrain such as, rocks, trees, water, bog, where, rocks are impassable and bog slows you down.
+- **Multiple Enemy Types:** The user is up against, Gold-Diggers who will guard the treasure when they find it and Wandering-Zombies that are after everybody.
 - **Standalone Installation:** Includes simple installer and validator scripts to set up the environment and dependencies.
 
 ### Preview
