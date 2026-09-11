@@ -6,20 +6,31 @@ BUSH   = "*"
 WALL   = "#"
 EMPTY  = " "
 WATER  = "~"
+BOG    = "%"          # sticky brown ground – costs 2 presses to cross
 COIN   = "£"
 SHOP   = "$"
 GUARD  = "G"          # coin guardian
 
-# Multi-line decorative art
+# Coin is rendered as the three-character sequence  ( £ )
+COIN_LEFT  = "("
+COIN_RIGHT = ")"
+
+# Multi-line decorative art – stamped onto the map grid
 BUILDINGS = {
     "small_house": [
         " /\\ ",
         "/__\\",
+        "|  |",
     ],
     "shop": [
         "+----+",
         "|SHOP|",
         "+----+",
+    ],
+    "hut": [
+        " /\\",
+        "/||\\",
+        " || ",
     ],
 }
 
@@ -27,10 +38,25 @@ NATURE = {
     "pine_tree": [
         " /\\ ",
         "//\\\\",
+        " || ",
+    ],
+    "tall_tree": [
+        "  ^  ",
+        " /|\\ ",
+        "//|\\\\",
+        "  |  ",
     ],
     "rocks_cluster": [
-        " o",
+        " o ",
         "o o",
+    ],
+    "bush_cluster": [
+        " * * ",
+        "* * *",
+    ],
+    "cactus": [
+        " Y ",
+        " | ",
     ],
 }
 
@@ -38,20 +64,39 @@ PEOPLE = {
     "villager": "i",
 }
 
-# Shop dialog graphic (exactly as requested)
+# Standard shop dialog
 SHOP_DIALOG = """\
  -= The Shop =-
 
-Cola      - £2 [Buy]
-
-Doughnuts - £1 [Buy]
+Cola       - £2 [Buy]
+Doughnuts  - £1 [Buy]
 
    [Exit Shop]
 """
 
+# Special shop (the "other" one) sells Rocky-Road
+SHOP_DIALOG_SPECIAL = """\
+ -= The Rocky Shop =-
+
+Rocky-Road - £1 [Buy]   (1.5x doughnut heal)
+Cola       - £2 [Buy]
+
+   [Exit Shop]
+"""
+
+SHOP_SIGN = [
+    ".-.",
+    "|$|",
+    "'-'",
+]
+
+WIN_BANNER = [
+    "  *  *  *  *  *  *  *  *  *  ",
+    " *  ALL COINS COLLECTED  * ",
+    "  *  *  *  *  *  *  *  *  *  ",
+]
+
 if __name__ == "__main__":
     print("--- Tiles ---")
-    for name in ["PLAYER", "ROCK", "BUSH", "WALL", "WATER", "COIN", "SHOP", "GUARD"]:
+    for name in ["PLAYER", "ROCK", "BUSH", "WALL", "WATER", "BOG", "COIN", "SHOP", "GUARD"]:
         print(f"  {name:8} : {globals()[name]}")
-    print("\n--- Shop Dialog ---")
-    print(SHOP_DIALOG)
