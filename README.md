@@ -19,7 +19,7 @@ This project is an experiment in creating a procedural generating text adventure
 - Arrow keys and mouse for interface.
 
 ## Notation:
-- This game was created as a base to create other games from because its "Mosthly There". One could take the game, and then say to an AI, convert and upgrade, this game into a text based fallout survival builder clone.
+- This game was created as a base to create other games from because its "Mostly There". One could take the game, and then say to an AI, convert and upgrade, this game into a text based fallout survival builder clone.
 
  ### Credits:
  - Jules, Grok, possibly other AI too were used in the making of this program.
