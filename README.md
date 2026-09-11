@@ -20,7 +20,10 @@ This project is an experiment in creating a procedural generating text adventure
 
 ## Notation:
 - This game was created as a base to create other games from because its "Mostly There". One could, for example, take the game, and then say to an AI, convert and upgrade, this game into a text based fallout survival builder clone. In any case, this is not intended as a game to be played seriously, more a proof of concept.
-- It may turn out to be an incredibly hard game, or a very easy one, but I am guessing the key to making it easier would be to visit the shops as few times as possible, because that controls the enemy multiplier, however hardness will also multiply with every coin gained, and again, I dont intend to tune gameplay on the vanilla blueprint.
+- It may turn out to be an incredibly hard game, or a very easy one, but I am guessing the key to making it easier would be to visit the shops as few times as possible, because that controls the enemy multiplier, however hardness will also multiply with every coin gained.
+
+### Development:
+- As much as I want to get this first game how I want, I would more so want to push on to making it into a better game, or working on one of my other projects.
 
  ### Credits:
  - Jules, Grok, possibly other AI too were used in the making of this program.
